@@ -1,26 +1,111 @@
 # Agentflow_AI
 
-Agentflow_AI is an AI operations automation platform. An operator describes an automation in natural language, reviews the generated workflow on a React Flow canvas, executes it through a chain of cooperating agents, and follows every step in a real-time audit timeline.
+> Turn plain-English instructions into observable, executable AI workflows.
 
-This README is the local development and implementation guide derived from `spec.md` and `Spec_DOCUment_Ai AUTOMATION PROJECT.txt`. Those two files currently contain the same requirements; when they differ, `spec.md` should be treated as the canonical source.
+## Live Demo
 
-> **Repository status:** the workspace currently contains the specification only. The commands and file paths below define the project that must be implemented phase by phase. Do not treat the application as runnable until the corresponding `client/`, `server/`, and package files have been created.
+| Service | Link | Purpose |
+| --- | --- | --- |
+| Frontend | [Open Agentflow_AI](https://nxtwave-agentic-ai.vercel.app) | Operator console |
+| Backend API | [Open API](https://nxtwave-agentic-ai.onrender.com) | Express API and Socket.IO server |
+| API health | [Check system health](https://nxtwave-agentic-ai.onrender.com/api/health) | Deployment and service status |
+| Source code | [GitHub repository](https://github.com/PROGRAMERPARTH/Nxtwave_Agentic_Ai) | Project source and issues |
 
-## 1. What Will Be Built
+> **Current deployment note:** the frontend and backend are live. The backend currently falls back to in-memory MongoDB/Redis when production services are not configured, so persistent production data requires the Render environment variables described below.
 
-The completed platform will provide:
+## What Is Agentflow_AI?
 
-- JWT authentication with `admin` and `operator` roles.
-- Workflow CRUD, versioning, duplication, tags, search, and execution controls.
-- Prompt-to-workflow generation using OpenRouter, then Gemini, then a deterministic local builder.
-- A drag-and-drop React Flow workflow editor with node configuration.
-- A fixed planner, execution, validation, recovery, and monitoring agent chain.
-- Gmail, Slack, Discord, and Google Sheets integrations through OAuth or bot credentials.
-- MongoDB persistence, encrypted integration credentials, execution logs, notifications, and agent memory.
-- BullMQ/Redis background execution with an in-memory fallback for local development.
-- Socket.IO event streaming for live execution timelines.
+Agentflow_AI is an AI operations automation platform for operators who need to design, run, and audit business automations without manually wiring every API call. An operator describes an automation in natural language, reviews the generated graph on a visual canvas, executes it through cooperating agents, and follows every step in a real-time timeline.
 
-## 2. Architecture
+## The Motive
+
+Traditional automation tools can connect services, but they often hide the reasoning and failure handling behind a black box. Agentflow_AI is designed to make automation:
+
+- **Understandable:** prompts become visible workflow graphs that operators can inspect and edit.
+- **Resilient:** planner, execution, validation, recovery, and monitoring agents handle the lifecycle together.
+- **Observable:** every agent step becomes a live event and a persisted audit log.
+- **Actionable:** workflows can use Gmail, Slack, Discord, Google Sheets, and AI providers.
+- **Safe to operate:** credentials are encrypted at rest, routes are protected, and failures become explicit states instead of silent errors.
+
+## How It Works
+
+```text
+Describe an automation
+  |
+  v
+Generate or edit a workflow graph
+  |
+  v
+Run the five-agent execution chain
+  |
+  v
+Validate, retry, recover, or escalate
+  |
+  v
+Stream events and persist the audit timeline
+```
+
+### Typical operator journey
+
+1. Register or sign in.
+2. Enter a prompt such as “When an invoice arrives, extract its data and notify Slack.”
+3. Review the generated nodes, edges, and configuration.
+4. Connect the required provider integrations.
+5. Execute the workflow.
+6. Watch live planner, execution, validation, recovery, and monitoring events.
+7. Review the final output, logs, notifications, and execution history.
+
+## Core Capabilities
+
+- Natural-language prompt-to-workflow generation.
+- Drag-and-drop React Flow workflow editor.
+- Workflow creation, search, versioning, duplication, tagging, and deletion.
+- Five-agent orchestration: planner, execution, validation, recovery, and monitoring.
+- Gmail, Slack, Discord, and Google Sheets integration architecture.
+- OpenRouter and Gemini generation with a deterministic offline fallback.
+- JWT authentication with operator/admin roles and persistent client sessions.
+- Execution pause, resume, cancel, retry, and escalation states.
+- Socket.IO live events, notifications, and complete execution timelines.
+- MongoDB persistence with a development fallback and encrypted provider credentials.
+
+## Technology Stack
+
+| Area | Technologies |
+| --- | --- |
+| Frontend | Next.js 16, React 19, Pages Router, Tailwind CSS, Zustand, Axios |
+| Workflow UI | `@xyflow/react`, animated edges, node palette, configuration panels |
+| Backend | Node.js, Express, Mongoose, JWT, bcryptjs, express-validator |
+| Background jobs | BullMQ, ioredis, Redis, in-memory queue fallback |
+| Real time | Socket.IO server and client |
+| AI | OpenRouter, Google Generative AI, LangChain/LangGraph-compatible orchestration |
+| Integrations | Gmail, Slack, Discord, Google Sheets |
+| Security | Helmet, CORS, rate limiting, encrypted credentials, request validation |
+| Deployment | Vercel frontend, Render backend, MongoDB Atlas, hosted Redis |
+
+## Quick Start
+
+### Run the deployed application
+
+Open the [live frontend](https://nxtwave-agentic-ai.vercel.app), create an operator account, and use the workflow builder. The [backend health endpoint](https://nxtwave-agentic-ai.onrender.com/api/health) confirms whether production database and AI services are configured.
+
+### Run locally
+
+Requirements: Node.js 20+, npm, Git, and Docker Desktop for local MongoDB/Redis.
+
+```powershell
+git clone https://github.com/PROGRAMERPARTH/Nxtwave_Agentic_Ai.git
+Set-Location Nxtwave_Agentic_Ai
+npm install
+npm run install:all
+docker compose up -d mongodb redis
+npm run dev
+```
+
+Open `http://localhost:3000`. The API runs at `http://localhost:5000` and its health check is `http://localhost:5000/api/health`.
+
+For environment variables, provider setup, troubleshooting, and phase-by-phase verification, continue with the sections below.
+
+## Architecture
 
 ```text
 Browser (Next.js Pages Router)
@@ -41,7 +126,7 @@ The frontend lives in `client/` and the backend lives in `server/`.
 
 Controllers only parse requests and shape responses. Services own business rules and persistence. Agents must remain independent of HTTP. Integrations are accessed by the integration service through the common integration interface; agents must not call provider SDKs directly.
 
-## 3. Prerequisites
+## Prerequisites
 
 Install these before starting local development:
 
@@ -69,7 +154,7 @@ docker --version
 docker compose version
 ```
 
-## 4. Recommended Project Layout
+## Project Layout
 
 Create the implementation using this layout:
 
@@ -100,7 +185,7 @@ Create the implementation using this layout:
 
 The required detailed frontend and backend paths are listed in the specification. Keep those names stable because they describe the intended ownership boundaries.
 
-## 5. Bootstrap the Repository
+## Bootstrap the Repository
 
 Run these commands from the repository root after the source files have been created:
 
@@ -133,7 +218,7 @@ Use `npm run dev` from the root for the normal two-service development experienc
 - Backend API: `http://localhost:5000`
 - Health check: `http://localhost:5000/api/health`
 
-## 6. Start Local Infrastructure
+## Start Local Infrastructure
 
 Run MongoDB and Redis with Docker Compose:
 
@@ -157,7 +242,7 @@ docker compose down
 
 The server must still start if MongoDB or Redis is unavailable. MongoDB should use the specified in-memory fallback, and the execution queue should use its in-memory fallback when Redis is not configured. These fallbacks are for local development and must not be presented as production persistence.
 
-## 7. Environment Configuration
+## Environment Configuration
 
 Create `server/.env` from this template. Never commit this file or real credentials.
 
@@ -210,7 +295,7 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:5000
 
 Only variables prefixed with `NEXT_PUBLIC_` may be exposed to browser code. Provider secrets, JWT secrets, and encryption keys belong exclusively in `server/.env`.
 
-## 8. Provider Setup
+## Provider Setup
 
 Provider setup is optional for the deterministic workflow builder and mocked/local execution paths. It is required for real external actions.
 
@@ -243,7 +328,7 @@ Provider setup is optional for the deterministic workflow builder and mocked/loc
 
 Set `OPENROUTER_API_KEY` to make OpenRouter the preferred generator. Set `GEMINI_API_KEY` to enable Gemini fallback. With both unset, the deterministic builder must still create runnable graphs for email, invoice routing, Slack/Discord notification, and sheet append prompts.
 
-## 9. Implementation Order
+## Implementation Order
 
 Implement and verify each phase before starting the next one.
 
@@ -314,7 +399,7 @@ Check that tokens never appear in logs or API responses and that reconnecting do
 
 Check that a queued execution produces matching Socket.IO events, `ExecutionLog` records, final execution state, and notifications.
 
-## 10. Local Run Procedure
+## Local Run Procedure
 
 Once the implementation exists, use this sequence for every fresh checkout:
 
@@ -331,7 +416,7 @@ Once the implementation exists, use this sequence for every fresh checkout:
 11. Execute the workflow and inspect the timeline, logs, status, and notification drawer.
 12. Stop the app and infrastructure with `docker compose down` when finished.
 
-## 11. Verification Checklist
+## Verification Checklist
 
 Before considering a phase complete, verify:
 
@@ -358,7 +443,7 @@ Invoke-RestMethod http://localhost:5000/api/health
 
 Add linting and API/integration tests to the package scripts as the implementation is created. Run backend tests against an isolated test database and never against a developer's persistent database.
 
-## 12. Troubleshooting
+## Troubleshooting
 
 **Port 3000 or 5000 is already in use**
 
@@ -384,7 +469,7 @@ Restore the original `CREDENTIAL_ENCRYPTION_KEY` or remove the local integration
 
 Check the server logs for provider status without printing secrets. Remove the provider key temporarily to verify that the deterministic fallback still works.
 
-## 13. Security Rules
+## Security Rules
 
 - Keep all secrets in environment variables or a managed secret store.
 - Never commit `.env`, OAuth client secrets, JWT secrets, encryption keys, or tokens.
@@ -396,7 +481,7 @@ Check the server logs for provider status without printing secrets. Remove the p
 - Redact authorization headers and provider responses from logs.
 - Use separate development, test, and production databases.
 
-## 14. Production Notes
+## Production Notes
 
 The in-memory database and queue fallbacks are intentionally for local development only. A production deployment requires managed MongoDB, Redis, a stable encryption key, TLS, provider-approved public OAuth callback URLs, restricted CORS, secret management, monitoring, backups, and a process manager or container orchestration strategy.
 
