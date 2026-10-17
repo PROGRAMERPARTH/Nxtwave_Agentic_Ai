@@ -20,7 +20,16 @@ const useAuthStore = create(
           set({ user, token, isAuthenticated: true, isLoading: false, error: null });
           return { success: true };
         } catch (err) {
-          const message = err.response?.data?.error || 'Registration failed';
+          let message = 'Registration failed';
+          if (err.response?.data?.details?.length) {
+            message = err.response.data.details.map((d) => d.message).join('. ');
+          } else if (err.response?.data?.error) {
+            message = err.response.data.error;
+          } else if (err.code === 'ERR_NETWORK' || !err.response) {
+            message = 'Cannot reach backend server. Please verify the server is running on http://localhost:5000.';
+          } else if (err.message) {
+            message = err.message;
+          }
           set({ isLoading: false, error: message });
           return { success: false, error: message };
         }
@@ -35,7 +44,16 @@ const useAuthStore = create(
           set({ user, token, isAuthenticated: true, isLoading: false, error: null });
           return { success: true };
         } catch (err) {
-          const message = err.response?.data?.error || 'Login failed';
+          let message = 'Login failed';
+          if (err.response?.data?.details?.length) {
+            message = err.response.data.details.map((d) => d.message).join('. ');
+          } else if (err.response?.data?.error) {
+            message = err.response.data.error;
+          } else if (err.code === 'ERR_NETWORK' || !err.response) {
+            message = 'Cannot reach backend server. Please verify the server is running on http://localhost:5000.';
+          } else if (err.message) {
+            message = err.message;
+          }
           set({ isLoading: false, error: message });
           return { success: false, error: message };
         }
