@@ -35,7 +35,24 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// ─── Health Check ────────────────────────────────────────────────────
+// ─── Root & Health Check ─────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: '🚀 Agentflow AI Backend API is running.',
+    version: '1.0.0',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      workflows: '/api/workflows',
+      executions: '/api/executions',
+      integrations: '/api/integrations',
+      notifications: '/api/notifications',
+    },
+    clientUrl: config.clientUrl || 'https://nxtwave-agentic-ai.vercel.app',
+  });
+});
+
 app.get('/api/health', (req, res) => {
   const db = getDBStatus();
   res.json({
